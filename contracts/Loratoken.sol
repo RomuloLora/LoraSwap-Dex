@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
-contract LoraToken {
-    string public name = "Lora Token";
-    string public symbol = "LORA";
-    uint256 public totalSupply = 1000000 * 10**18; // 1 milhão de tokens
+contract Loratoken {
+    string public name;
+    string public symbol;
+    uint256 public totalSupply;
     uint8 public decimals = 18;
     
     mapping(address => uint256) public balanceOf;
@@ -13,7 +13,10 @@ contract LoraToken {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
     
-    constructor() {
+    constructor(string memory _name, string memory _symbol) {
+        name = _name;
+        symbol = _symbol;
+        totalSupply = 1000000 * 10**18; // 1 milhão de tokens
         balanceOf[msg.sender] = totalSupply;
         emit Transfer(address(0), msg.sender, totalSupply);
     }
