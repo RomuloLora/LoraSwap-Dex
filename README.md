@@ -1,143 +1,249 @@
-# LoraDEX - Decentralized Exchange Smart Contract
+# LoraSwap DEX
 
-Um DEX (Decentralized Exchange) simples implementado em Solidity, baseado no modelo AMM (Automated Market Maker) com fórmula de produto constante.
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.19-blue.svg)](https://soliditylang.org/)
+[![Hardhat](https://img.shields.io/badge/Hardhat-2.24.3-orange.svg)](https://hardhat.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-## 📋 Descrição
+LoraSwap é um DEX (Decentralized Exchange) completo baseado em AMM (Automated Market Maker) inspirado no Uniswap V2, construído com Solidity e Hardhat.
 
-O LoraDEX é um contrato inteligente que permite:
-- Adicionar liquidez para pares de tokens
-- Realizar swaps entre tokens usando a fórmula x * y = k
-- Calcular preços de saída baseados nas reservas atuais
+## 🚀 Características
 
-## 🏗️ Arquitetura
+- **AMM (Automated Market Maker)**: Sistema de criação de mercado automatizado
+- **Liquidez Automática**: Adição e remoção de liquidez com tokens LP
+- **Swaps Seguros**: Troca de tokens com proteção contra slippage
+- **Factory Pattern**: Criação dinâmica de pares de trading
+- **Router Inteligente**: Interface simplificada para operações
+- **Token ERC-20 Avançado**: Token com funcionalidades de mint, burn e pausa
+- **Testes Completos**: Cobertura de testes abrangente
+- **Verificação de Contratos**: Suporte para verificação no Etherscan
 
-### Contratos Principais
+## 📋 Pré-requisitos
 
-- **LoraDEX.sol**: Contrato principal que gerencia o DEX
-  - Gerenciamento de reservas de tokens
-  - Funções de swap
-  - Cálculo de preços usando AMM
-
-### Funcionalidades
-
-1. **Add Liquidity**: Permite aos usuários adicionar liquidez ao pool
-2. **Swap**: Permite trocar um token por outro
-3. **Price Calculation**: Calcula o preço de saída baseado na fórmula AMM
-
-## 🚀 Instalação e Uso
-
-### Pré-requisitos
-
-- Node.js (versão 16 ou superior)
+- Node.js (v16 ou superior)
 - npm ou yarn
+- Git
 
-### Instalação
+## 🛠️ Instalação
 
+1. **Clone o repositório**
 ```bash
-# Clone o repositório
-git clone <seu-repositorio>
-cd LoraSwap-Dex
+git clone https://github.com/seu-usuario/loraswap-dex.git
+cd loraswap-dex
+```
 
-# Instale as dependências
+2. **Instale as dependências**
+```bash
 npm install
 ```
 
-### Compilação
+3. **Configure as variáveis de ambiente**
+```bash
+cp env.example .env
+# Edite o arquivo .env com suas configurações
+```
+
+4. **Compile os contratos**
+```bash
+npm run compile
+```
+
+## 🧪 Testes
+
+Execute os testes para verificar se tudo está funcionando:
 
 ```bash
-# Compile os contratos
-npx hardhat compile
+# Executar todos os testes
+npm test
+
+# Executar testes com cobertura
+npm run test:coverage
+
+# Executar testes específicos
+npx hardhat test test/LoraToken.test.js
+npx hardhat test test/LoraDEX.test.js
 ```
 
-### Testes
+## 🚀 Deploy
 
+### Deploy Local
 ```bash
-# Execute os testes
-npx hardhat test
+# Iniciar nó local
+npm run node
+
+# Em outro terminal, fazer deploy
+npm run deploy:local
 ```
 
-### Deploy
-
+### Deploy em Testnet
 ```bash
-# Deploy para rede local
-npx hardhat run scripts/deploy.js --network localhost
-
-# Deploy para rede de teste
-npx hardhat run scripts/deploy.js --network testnet
+npm run deploy:testnet
 ```
 
-## 📝 Funcionalidades do Contrato
-
-### Add Liquidity
-```solidity
-function addLiquidity(uint256 amountA, uint256 amountB) external
+### Deploy em Mainnet
+```bash
+npm run deploy:mainnet
 ```
-Adiciona liquidez ao pool. Os usuários devem aprovar o contrato para transferir seus tokens.
 
-### Swap
-```solidity
-function swap(address tokenIn, uint256 amountIn) external
-```
-Realiza uma troca de tokens. O usuário especifica qual token está enviando e a quantidade.
+## 📁 Estrutura do Projeto
 
-### Get Amount Out
-```solidity
-function getAmountOut(uint256 amountIn, uint256 reserveIn, uint256 reserveOut) public pure returns (uint256)
 ```
-Calcula a quantidade de tokens que serão recebidos em uma troca.
+LoraSwap-Dex/
+├── contracts/                 # Contratos inteligentes
+│   ├── LoraToken.sol         # Token ERC-20 principal
+│   ├── LoraDEX.sol           # Contrato principal do DEX
+│   ├── LoraFactory.sol       # Factory para criar pares
+│   └── LoraRouter.sol        # Router para operações
+├── test/                     # Testes
+│   ├── LoraToken.test.js     # Testes do token
+│   └── LoraDEX.test.js       # Testes do DEX
+├── scripts/                  # Scripts de deploy
+│   └── deploy.js             # Script principal de deploy
+├── hardhat.config.js         # Configuração do Hardhat
+├── package.json              # Dependências e scripts
+└── README.md                 # Este arquivo
+```
+
+## 🔧 Contratos
+
+### LoraToken
+- Token ERC-20 com funcionalidades avançadas
+- Sistema de minting controlado
+- Cooldown de transferências
+- Funcionalidade de pausa
+- Queima de tokens
+
+### LoraDEX
+- AMM baseado em Uniswap V2
+- Cálculo automático de preços
+- Adição/remoção de liquidez
+- Swaps seguros com proteção
+
+### LoraFactory
+- Criação dinâmica de pares
+- Gerenciamento de taxas
+- Registro de todos os pares
+
+### LoraRouter
+- Interface simplificada para operações
+- Cálculo de rotas de swap
+- Operações de liquidez
+
+## 🔒 Segurança
+
+- **ReentrancyGuard**: Proteção contra ataques de reentrância
+- **Ownable**: Controle de acesso para funções administrativas
+- **SafeERC20**: Operações seguras com tokens ERC-20
+- **Validações**: Verificações rigorosas de entrada
+- **Testes**: Cobertura abrangente de casos de uso
+
+## 📊 Funcionalidades
+
+### Swaps
+- Swap exato de entrada
+- Swap exato de saída
+- Proteção contra slippage
+- Cálculo automático de preços
+
+### Liquidez
+- Adição de liquidez
+- Remoção de liquidez
+- Tokens LP (Liquidity Provider)
+- Recompensas de liquidez
+
+### Gestão de Tokens
+- Minting controlado
+- Burning de tokens
+- Transferências com cooldown
+- Pausa de emergência
+
+## 🧪 Testes
+
+O projeto inclui testes abrangentes para:
+
+- ✅ Deploy de contratos
+- ✅ Operações de token
+- ✅ Swaps de tokens
+- ✅ Gestão de liquidez
+- ✅ Casos de erro
+- ✅ Eventos emitidos
+- ✅ Segurança e permissões
 
 ## 🔧 Configuração
 
 ### Variáveis de Ambiente
 
-Crie um arquivo `.env` na raiz do projeto:
+Crie um arquivo `.env` baseado no `env.example`:
 
 ```env
-PRIVATE_KEY=sua_chave_privada_aqui
-INFURA_URL=sua_url_infura_aqui
-ETHERSCAN_API_KEY=sua_chave_etherscan_aqui
+# Network Configuration
+MAINNET_RPC_URL=https://mainnet.infura.io/v3/YOUR-PROJECT-ID
+TESTNET_RPC_URL=https://sepolia.infura.io/v3/YOUR-PROJECT-ID
+
+# Private Key (NEVER commit this to version control)
+PRIVATE_KEY=your_private_key_here
+
+# API Keys
+ETHERSCAN_API_KEY=your_etherscan_api_key_here
+COINMARKETCAP_API_KEY=your_coinmarketcap_api_key_here
+
+# Gas Reporting
+REPORT_GAS=true
 ```
 
 ### Redes Suportadas
 
-- Localhost (desenvolvimento)
-- Testnet (Goerli, Sepolia)
-- Mainnet (Ethereum)
+- **Localhost**: Desenvolvimento local
+- **Sepolia**: Testnet Ethereum
+- **Mainnet**: Ethereum principal
 
-## 📊 Fórmula AMM
+## 📈 Gas Optimization
 
-O contrato usa a fórmula de produto constante:
+O projeto inclui otimizações de gas:
+
+- Compilador otimizado (200 runs)
+- ViaIR habilitado
+- Operações eficientes
+- Relatórios de gas automáticos
+
+## 🔍 Verificação de Contratos
+
+Os contratos são automaticamente verificados no Etherscan após o deploy:
+
+```bash
+npm run verify
 ```
-(x + Δx) * (y - Δy) = x * y
-```
-
-Onde:
-- x, y = reservas atuais dos tokens
-- Δx = quantidade de entrada
-- Δy = quantidade de saída
-
-## 🛡️ Segurança
-
-- Verificações de quantidade mínima
-- Proteção contra divisão por zero
-- Eventos para auditoria de transações
-
-## 📄 Licença
-
-Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
 ## 🤝 Contribuição
 
-1. Faça um fork do projeto
+1. Fork o projeto
 2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
 3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
 
-## 📞 Contato
+## 📝 Licença
 
-Para dúvidas ou sugestões, abra uma issue no repositório.
+Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+## ⚠️ Disclaimer
+
+Este software é fornecido "como está", sem garantias de qualquer tipo. Use por sua conta e risco.
+
+## 📞 Suporte
+
+- **Issues**: [GitHub Issues](https://github.com/seu-usuario/loraswap-dex/issues)
+- **Documentação**: [Wiki](https://github.com/seu-usuario/loraswap-dex/wiki)
+- **Discord**: [LoraSwap Community](https://discord.gg/loraswap)
+
+## 🚀 Roadmap
+
+- [ ] Interface web (React/Next.js)
+- [ ] Integração com mais redes (Polygon, BSC)
+- [ ] Sistema de governança
+- [ ] Yield farming
+- [ ] Analytics avançados
+- [ ] Mobile app
 
 ---
 
-**Nota**: Este é um projeto educacional. Use em produção por sua conta e risco. 
+**LoraSwap DEX** - Construindo o futuro do DeFi 🚀 
