@@ -1,249 +1,314 @@
 # LoraSwap DEX
 
-[![Solidity](https://img.shields.io/badge/Solidity-0.8.19-blue.svg)](https://soliditylang.org/)
-[![Hardhat](https://img.shields.io/badge/Hardhat-2.24.3-orange.svg)](https://hardhat.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+A complete decentralized exchange (DEX) built on Ethereum with automated market making (AMM) functionality, featuring both smart contracts and a modern frontend interface.
 
-LoraSwap é um DEX (Decentralized Exchange) completo baseado em AMM (Automated Market Maker) inspirado no Uniswap V2, construído com Solidity e Hardhat.
+## 🚀 Features
 
-## 🚀 Características
+### Smart Contracts
+- **AMM Core**: Automated market making with x*y=k formula
+- **Factory Pattern**: Create and manage trading pairs
+- **Router**: Simplified interface for token swaps and liquidity operations
+- **Custom Token**: ERC20 token with minting and transfer controls
+- **Security**: Reentrancy protection, deadline enforcement, slippage tolerance
 
-- **AMM (Automated Market Maker)**: Sistema de criação de mercado automatizado
-- **Liquidez Automática**: Adição e remoção de liquidez com tokens LP
-- **Swaps Seguros**: Troca de tokens com proteção contra slippage
-- **Factory Pattern**: Criação dinâmica de pares de trading
-- **Router Inteligente**: Interface simplificada para operações
-- **Token ERC-20 Avançado**: Token com funcionalidades de mint, burn e pausa
-- **Testes Completos**: Cobertura de testes abrangente
-- **Verificação de Contratos**: Suporte para verificação no Etherscan
+### Frontend
+- **Modern UI**: Clean, responsive interface built with Next.js and Tailwind CSS
+- **Wallet Integration**: Seamless connection with RainbowKit and Wagmi
+- **Real-time Updates**: Live price calculations and balance updates
+- **Advanced Features**: Slippage settings, transaction deadlines, expert mode
+- **Mobile Responsive**: Works perfectly on all devices
 
-## 📋 Pré-requisitos
-
-- Node.js (v16 ou superior)
-- npm ou yarn
-- Git
-
-## 🛠️ Instalação
-
-1. **Clone o repositório**
-```bash
-git clone https://github.com/seu-usuario/loraswap-dex.git
-cd loraswap-dex
-```
-
-2. **Instale as dependências**
-```bash
-npm install
-```
-
-3. **Configure as variáveis de ambiente**
-```bash
-cp env.example .env
-# Edite o arquivo .env com suas configurações
-```
-
-4. **Compile os contratos**
-```bash
-npm run compile
-```
-
-## 🧪 Testes
-
-Execute os testes para verificar se tudo está funcionando:
-
-```bash
-# Executar todos os testes
-npm test
-
-# Executar testes com cobertura
-npm run test:coverage
-
-# Executar testes específicos
-npx hardhat test test/LoraToken.test.js
-npx hardhat test test/LoraDEX.test.js
-```
-
-## 🚀 Deploy
-
-### Deploy Local
-```bash
-# Iniciar nó local
-npm run node
-
-# Em outro terminal, fazer deploy
-npm run deploy:local
-```
-
-### Deploy em Testnet
-```bash
-npm run deploy:testnet
-```
-
-### Deploy em Mainnet
-```bash
-npm run deploy:mainnet
-```
-
-## 📁 Estrutura do Projeto
+## 🏗️ Architecture
 
 ```
 LoraSwap-Dex/
-├── contracts/                 # Contratos inteligentes
-│   ├── LoraToken.sol         # Token ERC-20 principal
-│   ├── LoraDEX.sol           # Contrato principal do DEX
-│   ├── LoraFactory.sol       # Factory para criar pares
-│   └── LoraRouter.sol        # Router para operações
-├── test/                     # Testes
-│   ├── LoraToken.test.js     # Testes do token
-│   └── LoraDEX.test.js       # Testes do DEX
-├── scripts/                  # Scripts de deploy
-│   └── deploy.js             # Script principal de deploy
-├── hardhat.config.js         # Configuração do Hardhat
-├── package.json              # Dependências e scripts
-└── README.md                 # Este arquivo
+├── contracts/           # Smart contracts
+│   ├── LoraDEX.sol     # Core AMM pair contract
+│   ├── LoraFactory.sol # Factory for creating pairs
+│   ├── LoraRouter.sol  # Router for simplified interactions
+│   └── LoraToken.sol   # Custom ERC20 token
+├── frontend/           # Next.js frontend application
+│   ├── src/
+│   │   ├── app/        # Next.js App Router
+│   │   ├── components/ # React components
+│   │   ├── hooks/      # Custom React hooks
+│   │   └── lib/        # Utilities and configurations
+│   └── package.json
+├── test/               # Smart contract tests
+├── scripts/            # Deployment and utility scripts
+└── hardhat.config.js   # Hardhat configuration
 ```
 
-## 🔧 Contratos
+## 🛠️ Tech Stack
 
-### LoraToken
-- Token ERC-20 com funcionalidades avançadas
-- Sistema de minting controlado
-- Cooldown de transferências
-- Funcionalidade de pausa
-- Queima de tokens
+### Smart Contracts
+- **Solidity**: ^0.8.20
+- **OpenZeppelin**: ^5.3.0
+- **Hardhat**: Development and testing framework
+- **Ethers.js**: Blockchain interaction
 
-### LoraDEX
-- AMM baseado em Uniswap V2
-- Cálculo automático de preços
-- Adição/remoção de liquidez
-- Swaps seguros com proteção
+### Frontend
+- **Next.js**: 14 with App Router
+- **React**: 18 with TypeScript
+- **Tailwind CSS**: Styling
+- **Wagmi**: React hooks for Ethereum
+- **RainbowKit**: Wallet connection
+- **Framer Motion**: Animations
 
-### LoraFactory
-- Criação dinâmica de pares
-- Gerenciamento de taxas
-- Registro de todos os pares
+## 📋 Prerequisites
 
-### LoraRouter
-- Interface simplificada para operações
-- Cálculo de rotas de swap
-- Operações de liquidez
+- Node.js 16+
+- npm or yarn
+- MetaMask or compatible wallet
+- Git
 
-## 🔒 Segurança
+## 🚀 Quick Start
 
-- **ReentrancyGuard**: Proteção contra ataques de reentrância
-- **Ownable**: Controle de acesso para funções administrativas
-- **SafeERC20**: Operações seguras com tokens ERC-20
-- **Validações**: Verificações rigorosas de entrada
-- **Testes**: Cobertura abrangente de casos de uso
+### 1. Clone and Install
 
-## 📊 Funcionalidades
+```bash
+git clone <repository-url>
+cd LoraSwap-Dex
+npm run install:all
+```
 
-### Swaps
-- Swap exato de entrada
-- Swap exato de saída
-- Proteção contra slippage
-- Cálculo automático de preços
+### 2. Start Development Environment
 
-### Liquidez
-- Adição de liquidez
-- Remoção de liquidez
-- Tokens LP (Liquidity Provider)
-- Recompensas de liquidez
+```bash
+# Start both Hardhat node and frontend
+npm run dev
 
-### Gestão de Tokens
-- Minting controlado
-- Burning de tokens
-- Transferências com cooldown
-- Pausa de emergência
+# Or start them separately:
+npm run node        # Start Hardhat node
+npm run frontend    # Start frontend in another terminal
+```
 
-## 🧪 Testes
+### 3. Deploy Contracts
 
-O projeto inclui testes abrangentes para:
+```bash
+# Deploy to local network
+npm run deploy
 
-- ✅ Deploy de contratos
-- ✅ Operações de token
-- ✅ Swaps de tokens
-- ✅ Gestão de liquidez
-- ✅ Casos de erro
-- ✅ Eventos emitidos
-- ✅ Segurança e permissões
+# Update frontend with contract addresses
+cd frontend && node scripts/deploy.js
+```
 
-## 🔧 Configuração
+### 4. Access the Application
 
-### Variáveis de Ambiente
+- **Frontend**: http://localhost:3000
+- **Hardhat Node**: http://localhost:8545
 
-Crie um arquivo `.env` baseado no `env.example`:
+## 📖 Usage Guide
+
+### For Users
+
+1. **Connect Wallet**: Click "Connect Wallet" and approve the connection
+2. **Swap Tokens**: 
+   - Select tokens to swap
+   - Enter amount
+   - Review details and confirm
+3. **Add Liquidity**:
+   - Switch to "Liquidity" tab
+   - Enter token amounts
+   - Approve and add liquidity
+4. **Remove Liquidity**:
+   - Enter LP token amount
+   - Confirm removal
+
+### For Developers
+
+#### Smart Contract Development
+
+```bash
+# Compile contracts
+npm run compile
+
+# Run tests
+npm test
+
+# Deploy to local network
+npm run deploy
+
+# Deploy to testnet
+npm run deploy -- --network sepolia
+```
+
+#### Frontend Development
+
+```bash
+# Start frontend only
+npm run frontend
+
+# Build for production
+npm run frontend:build
+
+# Type checking
+cd frontend && npm run type-check
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Create `.env` file in the root directory:
 
 ```env
 # Network Configuration
-MAINNET_RPC_URL=https://mainnet.infura.io/v3/YOUR-PROJECT-ID
-TESTNET_RPC_URL=https://sepolia.infura.io/v3/YOUR-PROJECT-ID
-
-# Private Key (NEVER commit this to version control)
 PRIVATE_KEY=your_private_key_here
+INFURA_URL=your_infura_url_here
+ETHERSCAN_API_KEY=your_etherscan_key_here
 
-# API Keys
-ETHERSCAN_API_KEY=your_etherscan_api_key_here
-COINMARKETCAP_API_KEY=your_coinmarketcap_api_key_here
-
-# Gas Reporting
-REPORT_GAS=true
+# Frontend (in frontend/.env.local)
+NEXT_PUBLIC_FACTORY_ADDRESS=0x...
+NEXT_PUBLIC_ROUTER_ADDRESS=0x...
+NEXT_PUBLIC_LORA_TOKEN_ADDRESS=0x...
+NEXT_PUBLIC_LORA_TOKEN2_ADDRESS=0x...
+NEXT_PUBLIC_CHAIN_ID=31337
+NEXT_PUBLIC_RPC_URL=http://127.0.0.1:8545
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_project_id_here
 ```
 
-### Redes Suportadas
+### Network Configuration
 
-- **Localhost**: Desenvolvimento local
-- **Sepolia**: Testnet Ethereum
-- **Mainnet**: Ethereum principal
+Update `hardhat.config.js` for different networks:
 
-## 📈 Gas Optimization
+```javascript
+module.exports = {
+  networks: {
+    hardhat: {
+      chainId: 31337
+    },
+    localhost: {
+      url: "http://127.0.0.1:8545"
+    },
+    sepolia: {
+      url: process.env.INFURA_URL,
+      accounts: [process.env.PRIVATE_KEY]
+    }
+  }
+};
+```
 
-O projeto inclui otimizações de gas:
+## 🧪 Testing
 
-- Compilador otimizado (200 runs)
-- ViaIR habilitado
-- Operações eficientes
-- Relatórios de gas automáticos
-
-## 🔍 Verificação de Contratos
-
-Os contratos são automaticamente verificados no Etherscan após o deploy:
+### Smart Contract Tests
 
 ```bash
-npm run verify
+# Run all tests
+npm test
+
+# Run specific test file
+npx hardhat test test/LoraDEX.test.js
+
+# Run with coverage
+npx hardhat coverage
 ```
 
-## 🤝 Contribuição
+### Frontend Tests
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+```bash
+cd frontend
+npm run type-check
+npm run lint
+```
 
-## 📝 Licença
+## 📦 Deployment
 
-Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+### Smart Contracts
 
-## ⚠️ Disclaimer
+1. **Local Development**:
+   ```bash
+   npm run deploy
+   ```
 
-Este software é fornecido "como está", sem garantias de qualquer tipo. Use por sua conta e risco.
+2. **Testnet Deployment**:
+   ```bash
+   npm run deploy -- --network sepolia
+   ```
 
-## 📞 Suporte
+3. **Mainnet Deployment**:
+   ```bash
+   npm run deploy -- --network mainnet
+   ```
 
-- **Issues**: [GitHub Issues](https://github.com/seu-usuario/loraswap-dex/issues)
-- **Documentação**: [Wiki](https://github.com/seu-usuario/loraswap-dex/wiki)
-- **Discord**: [LoraSwap Community](https://discord.gg/loraswap)
+### Frontend
 
-## 🚀 Roadmap
+1. **Vercel (Recommended)**:
+   - Connect repository to Vercel
+   - Set environment variables
+   - Deploy automatically
 
-- [ ] Interface web (React/Next.js)
-- [ ] Integração com mais redes (Polygon, BSC)
-- [ ] Sistema de governança
-- [ ] Yield farming
-- [ ] Analytics avançados
-- [ ] Mobile app
+2. **Manual Deployment**:
+   ```bash
+   cd frontend
+   npm run build
+   npm start
+   ```
+
+## 🔍 Contract Verification
+
+```bash
+# Verify on Etherscan
+npx hardhat verify --network sepolia CONTRACT_ADDRESS
+```
+
+## 📊 Contract Addresses
+
+After deployment, update the addresses in `frontend/src/lib/contracts.ts`:
+
+```typescript
+export const CONTRACT_ADDRESSES = {
+  factory: "0x...",
+  router: "0x...",
+  loraToken: "0x...",
+  loraToken2: "0x...",
+} as const;
+```
+
+## 🛡️ Security
+
+- **Reentrancy Protection**: All external calls are protected
+- **Slippage Tolerance**: Configurable slippage protection
+- **Deadline Enforcement**: Transactions expire after set time
+- **Input Validation**: Comprehensive parameter validation
+- **Access Control**: Owner-only functions for critical operations
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+### Development Guidelines
+
+- Follow Solidity best practices
+- Write comprehensive tests
+- Update documentation
+- Use conventional commits
+- Ensure mobile responsiveness
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- **Documentation**: Check the [Wiki](../../wiki)
+- **Issues**: Report bugs on [GitHub Issues](../../issues)
+- **Discussions**: Join our [GitHub Discussions](../../discussions)
+- **Discord**: Join our community server
+
+## 🙏 Acknowledgments
+
+- Inspired by Uniswap V2
+- Built with OpenZeppelin contracts
+- UI components from Headless UI
+- Icons from Heroicons
 
 ---
 
-**LoraSwap DEX** - Construindo o futuro do DeFi 🚀 
+**Built with ❤️ by the LoraSwap Team**
+
+*For questions, support, or contributions, please reach out to our community!* 

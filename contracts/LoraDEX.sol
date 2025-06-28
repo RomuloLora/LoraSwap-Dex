@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
-import "@uniswap/lib/contracts/libraries/Babylonian.sol";
-import "@uniswap/lib/contracts/libraries/FullMath.sol";
 
 /**
  * @title LoraDEX
@@ -84,11 +82,6 @@ contract LoraDEX is ReentrancyGuard, Ownable {
         uint256 deadline
     ) external ensure(deadline) nonReentrant returns (uint256 amountA, uint256 amountB, uint256 liquidity) {
         (amountA, amountB) = _addLiquidity(amountADesired, amountBDesired, amountAMin, amountBMin);
-        address pair = address(this);
-        
-        tokenA.safeTransferFrom(msg.sender, pair, amountA);
-        tokenB.safeTransferFrom(msg.sender, pair, amountB);
-        
         liquidity = mint(to);
     }
     
@@ -102,10 +95,7 @@ contract LoraDEX is ReentrancyGuard, Ownable {
         address to,
         uint256 deadline
     ) external ensure(deadline) nonReentrant returns (uint256 amountA, uint256 amountB) {
-        address pair = address(this);
-        
-        IERC20(pair).safeTransferFrom(msg.sender, pair, liquidity);
-        (amountA, amountB) = burn(to);
+        (amountA, amountB) = burn(msg.sender, to, liquidity);
         require(amountA >= amountAMin, "LoraDEX: INSUFFICIENT_A_AMOUNT");
         require(amountB >= amountBMin, "LoraDEX: INSUFFICIENT_B_AMOUNT");
     }
@@ -217,10 +207,10 @@ contract LoraDEX is ReentrancyGuard, Ownable {
         }
     }
     
-    function quote(uint256 amountA, uint256 reserveA, uint256 reserveB) public pure returns (uint256 amountB) {
+    function quote(uint256 amountA, uint256 _reserveA, uint256 _reserveB) public pure returns (uint256 amountB) {
         require(amountA > 0, "LoraDEX: INSUFFICIENT_AMOUNT");
-        require(reserveA > 0 && reserveB > 0, "LoraDEX: INSUFFICIENT_LIQUIDITY");
-        amountB = amountA * reserveB / reserveA;
+        require(_reserveA > 0 && _reserveB > 0, "LoraDEX: INSUFFICIENT_LIQUIDITY");
+        amountB = amountA * _reserveB / _reserveA;
     }
     
     function mint(address to) internal returns (uint256 liquidity) {
@@ -229,40 +219,36 @@ contract LoraDEX is ReentrancyGuard, Ownable {
         uint256 balanceB = tokenB.balanceOf(address(this));
         uint256 amountA = balanceA - _reserveA;
         uint256 amountB = balanceB - _reserveB;
-        
+        require(amountA > 0 && amountB > 0, "LoraDEX: INSUFFICIENT_LIQUIDITY_MINTED");
         uint256 _totalSupply = totalSupply;
         if (_totalSupply == 0) {
-            liquidity = Babylonian.sqrt(amountA * amountB) - MINIMUM_LIQUIDITY;
+            liquidity = sqrt(amountA * amountB) - MINIMUM_LIQUIDITY;
+            require(liquidity > 0, "LoraDEX: INSUFFICIENT_LIQUIDITY_MINTED");
             _mint(address(0), MINIMUM_LIQUIDITY);
         } else {
+            require(_reserveA > 0 && _reserveB > 0, "LoraDEX: INSUFFICIENT_LIQUIDITY");
             liquidity = Math.min((amountA * _totalSupply) / _reserveA, (amountB * _totalSupply) / _reserveB);
+            require(liquidity > 0, "LoraDEX: INSUFFICIENT_LIQUIDITY_MINTED");
         }
-        require(liquidity > 0, "LoraDEX: INSUFFICIENT_LIQUIDITY_MINTED");
-        
         _mint(to, liquidity);
         _update(balanceA, balanceB, _reserveA, _reserveB);
         emit Mint(msg.sender, amountA, amountB);
     }
     
-    function burn(address to) internal returns (uint256 amountA, uint256 amountB) {
+    function burn(address from, address to, uint256 liquidity) internal returns (uint256 amountA, uint256 amountB) {
         (uint256 _reserveA, uint256 _reserveB) = getReserves();
-        address _tokenA = address(tokenA);
-        address _tokenB = address(tokenB);
         uint256 balanceA = tokenA.balanceOf(address(this));
         uint256 balanceB = tokenB.balanceOf(address(this));
-        uint256 liquidity = balanceOf[address(this)];
-        
         uint256 _totalSupply = totalSupply;
+        require(_totalSupply > 0, "LoraDEX: NO_SUPPLY");
         amountA = (liquidity * balanceA) / _totalSupply;
         amountB = (liquidity * balanceB) / _totalSupply;
         require(amountA > 0 && amountB > 0, "LoraDEX: INSUFFICIENT_LIQUIDITY_BURNED");
-        
-        _burn(address(this), liquidity);
+        _burn(from, liquidity);
         tokenA.safeTransfer(to, amountA);
         tokenB.safeTransfer(to, amountB);
         balanceA = tokenA.balanceOf(address(this));
         balanceB = tokenB.balanceOf(address(this));
-        
         _update(balanceA, balanceB, _reserveA, _reserveB);
         emit Burn(msg.sender, amountA, amountB, to);
     }
@@ -315,4 +301,18 @@ contract LoraDEX is ReentrancyGuard, Ownable {
     // Eventos
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
+    
+    // Função sqrt para substituir Babylonian
+    function sqrt(uint256 y) internal pure returns (uint256 z) {
+        if (y > 3) {
+            z = y;
+            uint256 x = y / 2 + 1;
+            while (x < z) {
+                z = x;
+                x = (y / x + x) / 2;
+            }
+        } else if (y != 0) {
+            z = 1;
+        }
+    }
 } 

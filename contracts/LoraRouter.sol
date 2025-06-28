@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import "./LoraFactory.sol";
 import "./LoraDEX.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
@@ -34,36 +34,47 @@ contract LoraRouter is ReentrancyGuard, Ownable {
     function addLiquidity(
         address tokenA,
         address tokenB,
-        uint256 amountADesired,
-        uint256 amountBDesired,
-        uint256 amountAMin,
-        uint256 amountBMin,
+        uint amountADesired,
+        uint amountBDesired,
+        uint amountAMin,
+        uint amountBMin,
         address to,
-        uint256 deadline
-    ) external ensure(deadline) returns (uint256 amountA, uint256 amountB, uint256 liquidity) {
+        uint deadline
+    ) external returns (uint amountA, uint amountB, uint liquidity) {
+        require(deadline >= block.timestamp, 'LoraRouter: EXPIRED');
+        
+        // Transfer tokens from user to router first
+        IERC20(tokenA).transferFrom(msg.sender, address(this), amountADesired);
+        IERC20(tokenB).transferFrom(msg.sender, address(this), amountBDesired);
+        
+        // Approve factory to spend tokens
+        IERC20(tokenA).approve(address(factory), amountADesired);
+        IERC20(tokenB).approve(address(factory), amountBDesired);
+        
+        // Get pair address
         address pair = factory.getPair(tokenA, tokenB);
-        if (pair == address(0)) {
-            pair = factory.createPair(tokenA, tokenB);
+        require(pair != address(0), 'LoraRouter: PAIR_NOT_FOUND');
+        
+        // Transfer tokens to pair
+        IERC20(tokenA).transfer(pair, amountADesired);
+        IERC20(tokenB).transfer(pair, amountBDesired);
+        
+        // Add liquidity to pair
+        (amountA, amountB, liquidity) = LoraDEX(pair).addLiquidity(
+            amountADesired,
+            amountBDesired,
+            amountAMin,
+            amountBMin,
+            to,
+            deadline
+        );
+        
+        // Transfer any excess tokens back to user
+        if (amountA < amountADesired) {
+            IERC20(tokenA).transfer(msg.sender, amountADesired - amountA);
         }
-        
-        IERC20(tokenA).safeTransferFrom(msg.sender, pair, amountADesired);
-        IERC20(tokenB).safeTransferFrom(msg.sender, pair, amountBDesired);
-        
-        liquidity = LoraDEX(pair).mint(to);
-        
-        // Retorna os montantes reais usados
-        uint256 balanceA = IERC20(tokenA).balanceOf(pair);
-        uint256 balanceB = IERC20(tokenB).balanceOf(pair);
-        amountA = amountADesired;
-        amountB = amountBDesired;
-        
-        if (balanceA < amountADesired) {
-            amountA = balanceA;
-            amountB = LoraDEX(pair).quote(amountA, amountADesired, amountBDesired);
-        }
-        if (balanceB < amountBDesired) {
-            amountB = balanceB;
-            amountA = LoraDEX(pair).quote(amountB, amountBDesired, amountADesired);
+        if (amountB < amountBDesired) {
+            IERC20(tokenB).transfer(msg.sender, amountBDesired - amountB);
         }
     }
     
@@ -83,7 +94,7 @@ contract LoraRouter is ReentrancyGuard, Ownable {
         require(pair != address(0), "LoraRouter: PAIR_NOT_FOUND");
         
         IERC20(pair).safeTransferFrom(msg.sender, pair, liquidity);
-        (amountA, amountB) = LoraDEX(pair).burn(to);
+        (amountA, amountB) = LoraDEX(pair).removeLiquidity(liquidity, amountAMin, amountBMin, to, deadline);
         require(amountA >= amountAMin, "LoraRouter: INSUFFICIENT_A_AMOUNT");
         require(amountB >= amountBMin, "LoraRouter: INSUFFICIENT_B_AMOUNT");
     }
@@ -92,17 +103,46 @@ contract LoraRouter is ReentrancyGuard, Ownable {
      * @dev Swap exato de entrada
      */
     function swapExactTokensForTokens(
-        uint256 amountIn,
-        uint256 amountOutMin,
+        uint amountIn,
+        uint amountOutMin,
         address[] calldata path,
         address to,
-        uint256 deadline
-    ) external ensure(deadline) returns (uint256[] memory amounts) {
-        amounts = getAmountsOut(amountIn, path);
-        require(amounts[amounts.length - 1] >= amountOutMin, "LoraRouter: INSUFFICIENT_OUTPUT_AMOUNT");
+        uint deadline
+    ) external returns (uint[] memory amounts) {
+        require(deadline >= block.timestamp, 'LoraRouter: EXPIRED');
+        require(path.length >= 2, 'LoraRouter: INVALID_PATH');
         
-        IERC20(path[0]).safeTransferFrom(msg.sender, address(this), amounts[0]);
-        _swap(amounts, path, to);
+        amounts = new uint[](path.length);
+        amounts[0] = amountIn;
+        
+        // Transfer input tokens from user to router
+        IERC20(path[0]).transferFrom(msg.sender, address(this), amountIn);
+        
+        for (uint i = 0; i < path.length - 1; i++) {
+            address pair = factory.getPair(path[i], path[i + 1]);
+            require(pair != address(0), 'LoraRouter: PAIR_NOT_FOUND');
+            
+            // Approve pair to spend tokens
+            IERC20(path[i]).approve(pair, amounts[i]);
+            
+            // Transfer tokens to pair
+            IERC20(path[i]).transfer(pair, amounts[i]);
+            
+            // Calculate expected output
+            uint amountOut = LoraDEX(pair).getAmountOut(amounts[i], IERC20(path[i]).balanceOf(pair), IERC20(path[i + 1]).balanceOf(pair));
+            amounts[i + 1] = amountOut;
+            
+            // Perform swap
+            LoraDEX(pair).swap(
+                0,
+                amountOut,
+                address(this),
+                ""
+            );
+        }
+        
+        // Transfer final tokens to user
+        IERC20(path[path.length - 1]).transfer(to, amounts[amounts.length - 1]);
     }
     
     /**
